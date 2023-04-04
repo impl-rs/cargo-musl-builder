@@ -1,5 +1,5 @@
 ARG ALPINE_VERSION=3.15.0
-ARG PATH
+
 #
 # for planning and caching rust deps
 # https://github.com/LukeMathWalker/cargo-chef
