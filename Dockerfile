@@ -38,7 +38,7 @@ RUN cargo build --release --target x86_64-unknown-linux-musl --bin {{ bin }}
 #
 # Copy the binary in a clean alpine image and zip it
 #
-FROM alpine:${ALPINE_VERSION} as builder
+FROM alpine:${ALPINE_VERSION}
 
 RUN apk add --no-cache zip
 
@@ -55,22 +55,5 @@ RUN zip -r ./bootstrap.zip ./bootstrap
 
 # Remove the binary
 RUN rm ./bootstrap
-
-#
-# Copy the binary in a image and run it
-#
-FROM public.ecr.aws/lambda/provided:al2 as runner
-
-# Copy binary
-COPY --from=rust /app/target/x86_64-unknown-linux-musl/release/{{ bin }} .
-
-# Rename binary to bootstrap
-RUN mv ./{{ bin }} ./bootstrap
-
-ADD https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie /usr/bin/aws-lambda-rie
-RUN chmod 755 /usr/bin/aws-lambda-rie
-
-ENTRYPOINT [ "/usr/bin/aws-lambda-rie", "./bootstrap" ]
-
 
 

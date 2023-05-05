@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.2.1", features = ["derive"] }
-tokio = { version = "1.9", features = ["macros", "process", "rt-multi-thread", "signal"] }
+tokio = { version = "1.9", features = ["macros", "process", "rt-multi-thread"] }
 anyhow = "1.0.70"
 tempfile = "3.5.0"
 tera = { version = "1.18.1", default-features = false }
