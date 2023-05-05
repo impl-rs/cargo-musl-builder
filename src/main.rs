@@ -1,17 +1,18 @@
 #![allow(incomplete_features)]
 #![feature(async_fn_in_trait)]
+mod docker;
+use crate::docker::{create_docker_file, docker_command};
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use std::include_str;
-use std::io::Write;
 use tempfile::NamedTempFile;
-use tera::{Context, Tera};
 use tokio::{
     process::Command,
     signal::unix::{signal, SignalKind},
     spawn,
 };
 use uuid::Uuid;
+
+const MUSL_FILE: &str = "bootstrap.zip";
 
 pub trait Execute {
     async fn execute(self) -> Result<()>;
@@ -22,24 +23,6 @@ impl Execute for Command {
         self.spawn().expect("failed to spawn").wait().await?;
         Ok(())
     }
-}
-
-const MUSL_FILE: &str = "bootstrap.zip";
-
-macro_rules! docker_command {
-    ($($arg:expr),* $(,)?) => ({
-        let mut cmd = Command::new("docker");
-        $( cmd.arg($arg); )*
-        cmd
-    });
-}
-
-macro_rules! context {
-    ($([$key:expr, $arg:expr]),* $(,)?) => ({
-        let mut context = Context::new();
-        $( context.insert($key, $arg); )*
-        context
-    });
 }
 
 #[derive(Parser)]
@@ -71,28 +54,6 @@ pub struct Cli {
 pub enum CliCommand {
     Build,
     Run,
-}
-
-fn create_docker_file(args: &Cli) -> Result<NamedTempFile> {
-    // Create a Tera instance
-    let mut tera = Tera::default();
-
-    // Add the Dockerfile template
-    tera.add_raw_template("Dockerfile", include_str!("../Dockerfile"))?;
-
-    // Create a temporary file for Dockerfile
-    let mut temp_docker_file = NamedTempFile::new_in(".")?;
-
-    // Add the path and bin to the a Tera context
-    let context = context!(["path", &args.path], ["bin", &args.bin]);
-
-    // Render the Dockerfile template
-    let docker_file = tera.render("Dockerfile", &context)?;
-
-    // Write Dockerfile to temporary file
-    writeln!(temp_docker_file, "{}", docker_file)?;
-
-    Ok(temp_docker_file)
 }
 
 struct MuslBuilder {
@@ -187,6 +148,7 @@ impl MuslBuilder {
         // Clone container name, so we can use it in spawned thread
         let container_name = self.args.container_name.clone();
 
+        // spawn a thread to handle interrupt signal and clean up
         spawn(async move {
             let mut sigint = signal(SignalKind::interrupt()).unwrap();
 
@@ -202,7 +164,7 @@ impl MuslBuilder {
                 None => eprintln!("Stream terminated before receiving SIGINT signal"),
             }
         });
-        // Create file reader for bootstrap.zip
+
         docker_command!("start", &self.args.container_name, "-a")
             .execute()
             .await?;
