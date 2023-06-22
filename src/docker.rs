@@ -8,7 +8,6 @@ use tera::{Context, Tera};
 macro_rules! docker_command {
     ($($arg:expr),* $(,)?) => ({
         let mut cmd = Command::new("docker");
-        cmd.env("DOCKER_BUILDKIT", "1");
         $( cmd.arg($arg); )*
         cmd
     });

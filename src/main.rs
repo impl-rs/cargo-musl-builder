@@ -83,6 +83,7 @@ impl MuslBuilder {
         // Execute the docker build command with cache on CI for Github Actions
         if is_ci {
             docker_command!(
+                "buildx",
                 "build",
                 ".",
                 "-f",
