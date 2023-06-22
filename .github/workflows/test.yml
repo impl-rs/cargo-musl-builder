@@ -53,5 +53,5 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Download latest release
-        uses: |
+        run: |
           wget https://github.com/impl-rs/cargo-musl-builder/releases/download/0.0.1/bootstrap.zip && unzip ./bootstrap.zip
