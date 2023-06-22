@@ -75,10 +75,33 @@ impl MuslBuilder {
     async fn create_docker_container(self) -> Result<Self> {
         let tag = Uuid::new_v4().to_string();
 
-        // Execute the docker build command
-        docker_command!("build", ".", "-f", self.docker_file.path(), "-t", &tag)
+        let is_ci = match std::env::var("CI") {
+            Ok(val) => val == "true",
+            Err(_e) => false,
+        };
+
+        // Execute the docker build command with cache on CI for Github Actions
+        if is_ci {
+            docker_command!(
+                "buildx",
+                "build",
+                ".",
+                "-f",
+                self.docker_file.path(),
+                "-t",
+                &tag,
+                "--cache-to",
+                "type=gha,mode=max",
+                "--cache-from",
+                "type=gha"
+            )
             .execute()
             .await?;
+        } else {
+            docker_command!("build", ".", "-f", self.docker_file.path(), "-t", &tag,)
+                .execute()
+                .await?;
+        }
 
         docker_command!("create", "--name", &self.args.container_name, &tag)
             .execute()
