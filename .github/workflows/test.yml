@@ -60,4 +60,4 @@ jobs:
           ./bootstrap -p . --bin cargo-musl-builder build &&
           rm ./bootstrap &&
           unzip ./bootstrap.zip &&
-          ./bootstrap -p . --bin cargo-musl-builder build &&
+          ./bootstrap -p . --bin cargo-musl-builder build
