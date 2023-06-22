@@ -56,4 +56,8 @@ jobs:
         run: |
           wget https://github.com/impl-rs/cargo-musl-builder/releases/download/0.0.1/bootstrap.zip &&
           unzip ./bootstrap.zip &&
-          ./bootstrap -p . --bin cargo-musl-builder build
+          rm ./bootstrap.zip &&
+          ./bootstrap -p . --bin cargo-musl-builder build &&
+          rm ./bootstrap &&
+          unzip ./bootstrap.zip &&
+          ./bootstrap -p . --bin cargo-musl-builder build &&
