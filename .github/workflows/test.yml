@@ -54,4 +54,6 @@ jobs:
 
       - name: Download latest release
         run: |
-          wget https://github.com/impl-rs/cargo-musl-builder/releases/download/0.0.1/bootstrap.zip && unzip ./bootstrap.zip
+          wget https://github.com/impl-rs/cargo-musl-builder/releases/download/0.0.1/bootstrap.zip &&
+          unzip ./bootstrap.zip &&
+          ./bootstrap -p . --bin cargo-musl-builder build
