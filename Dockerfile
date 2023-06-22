@@ -1,10 +1,10 @@
-ARG ALPINE_VERSION=3.15.0
+ARG ALPINE_VERSION=3.17.3
 
 #
 # for planning and caching rust deps
 # https://github.com/LukeMathWalker/cargo-chef
 #
-FROM clux/muslrust:nightly AS chef
+FROM clux/muslrust:1.71.0-nightly-2023-05-07 AS chef
 
 # install cargo chef for caching rust deps
 RUN cargo install cargo-chef --locked 
