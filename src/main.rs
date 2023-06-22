@@ -76,13 +76,7 @@ impl MuslBuilder {
         let tag = Uuid::new_v4().to_string();
 
         let is_ci = match std::env::var("CI") {
-            Ok(val) => {
-                if val == "true" {
-                    true
-                } else {
-                    false
-                }
-            }
+            Ok(val) => val == "true",
             Err(_e) => false,
         };
 
